@@ -1,4 +1,4 @@
-# FTSVault - A mobile, native FTSCoin FTS wallet
+# FTS Wallet - A mobile, native FTSCoin FTS wallet
 
 ![Screenshot](assets/home/start-dark.png)
 ![Screenshot](assets/home/home-dark.png)
@@ -6,7 +6,7 @@
 
 ## Releases - Android
 
-The initial release of FTSCoin FTSVault is built for the Android mobile platform. We have plans for an IOS release at a later time. Check the [FTSCoin FTSVault Releases page](https://github.com/ProjectFTS/ftscoin-mobile-wallet/releases) for the latest release.
+The initial release of FTSCoin FTS Wallet is built for the Android mobile platform. We have plans for an IOS release at a later time. Check the [FTSCoin FTS Wallet Releases page](https://github.com/ProjectFTS/ftscoin-mobile-wallet/releases) for the latest release.
 
 ### Initial Setup
 
