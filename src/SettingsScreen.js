@@ -1,7 +1,12 @@
 // Copyright (C) 2018, Zpalmtree
-// Copyright (C) 2019, 2ACoin Developers
+// Copyright (C) 2020, crypTuron
 //
 // Please see the included LICENSE file for more information.
+
+import * as _ from 'lodash';
+import * as Animatable from 'react-native-animatable';
+
+import * as Sentry from '@sentry/react-native';
 
 import React from 'react';
 
@@ -17,10 +22,12 @@ import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 
 import {
     View, FlatList, Alert, Text, Linking, ScrollView, Platform, NativeModules,
-    AppState,
+    AppState, RefreshControl,
 } from 'react-native';
 
 import NetInfo from "@react-native-community/netinfo";
+
+import { prettyPrintAmount, Daemon, WalletErrorCode } from 'turtlecoin-wallet-backend';
 
 import Config from './Config';
 import ListItem from './ListItem';
@@ -32,7 +39,10 @@ import { Globals } from './Globals';
 import { Authenticate } from './Authenticate';
 import { SeedComponent, CopyButton } from './SharedComponents';
 import { savePreferencesToDatabase, setHaveWallet } from './Database';
-import { navigateWithDisabledBack, toastPopUp, getArrivalTime } from './Utilities';
+
+import {
+    navigateWithDisabledBack, toastPopUp, getArrivalTime,
+} from './Utilities';
 
 export class FaqScreen extends React.Component {
     static navigationOptions = {
@@ -134,7 +144,7 @@ export class FaqScreen extends React.Component {
                     }}>
                         If you can no longer see your balance or sync status, you probably accidentally tapped the QR code.{'\n\n'}
                         Tap it again and your balance should reappear.{'\n\n'}
-                        This is intentional, so you can let someone scan your QR code, without revealing how many {Config.ticker} you have.
+                        This is intentional, so you can let someone scan your QR code, without revealing how much {Config.coinName} you have.
                     </Text>
 
                     <Text style={{
@@ -150,7 +160,7 @@ export class FaqScreen extends React.Component {
                         marginBottom: 20,
                     }}>
                         When you send a transaction, part of your balance gets locked.{'\n\n'}
-                        This is because your balance is comprised of multiple 'chunks' of {Config.coinName} {Config.ticker}.{'\n\n'}
+                        This is because your balance is comprised of multiple 'chunks' of {Config.coinName}.{'\n\n'}
                         It's similar to buying something with a $10 note, and getting back some change from the cashier.{'\n\n'}
                         Don't worry, your balance should unlock once the transaction confirms. (Normally in {arrivalTime})
                     </Text>
@@ -476,6 +486,7 @@ export class SwapCurrencyScreen extends React.Component {
         return(
             <View style={{
                 backgroundColor: this.props.screenProps.theme.backgroundColour,
+                flex: 1,
             }}>
                 <List style={{
                     backgroundColor: this.props.screenProps.theme.backgroundColour,
@@ -516,6 +527,277 @@ export class SwapCurrencyScreen extends React.Component {
                         )}
                     />
                 </List>
+            </View>
+        );
+    }
+}
+
+export class SwapNodeScreen extends React.Component {
+    static navigationOptions = {
+        title: 'Available Nodes',
+    };
+
+    constructor(props) {
+        super(props);
+
+        this.refresh = this.refresh.bind(this);
+        this.swapNode = this.swapNode.bind(this);
+
+        this.state = {
+            /* Sort by online nodes, then uptime (highest first), then fee
+            * (lowest first), then name */
+            nodes: _.orderBy(
+                Globals.daemons,
+                ['name',   'fee'],
+                ['asc',    'asc']
+            ),
+
+            selectedNode: Globals.preferences.node,
+
+            forceUpdate: 0,
+
+            refreshing: false,
+        };
+    }
+
+    async refresh() {
+
+        //Sentry.captureMessage('just got into refresh routine...');
+
+        this.setState({
+            refreshing: true,
+        });
+
+        await Globals.updateNodeList();
+
+        this.setState((prevState) => ({
+            refreshing: false,
+
+            nodes: _.orderBy(
+                Globals.daemons,
+                ['name',   'fee'],
+                ['asc',    'asc']
+            ),
+
+            forceUpdate: prevState.forceUpdate + 1,
+        }));
+    }
+
+    async swapNode(node) {
+
+        //Sentry.captureMessage('just got into swap node routine...');
+
+        toastPopUp('Swapping node...');
+
+        Globals.preferences.node = node.url + ':' + node.port;
+
+        this.setState((prevState) => ({
+            selectedNode: Globals.preferences.node,
+            forceUpdate: prevState.forceUpdate + 1,
+        }));
+
+        savePreferencesToDatabase(Globals.preferences);
+
+        await Globals.wallet.swapNode(Globals.getDaemon());
+
+        toastPopUp('Node swap complete.');
+    }
+
+    render() {
+        return(
+            <View style={{
+                backgroundColor: this.props.screenProps.theme.backgroundColour,
+                flex: 1,
+            }}>
+                <ScrollView
+                    style={{
+                        backgroundColor: this.props.screenProps.theme.backgroundColour,
+                        flex: 1,
+                        marginTop: 50,
+                    }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.refreshing}
+                            onRefresh={this.refresh}
+                            title='Updating node list...'
+                        />
+                    }
+                >
+                    {this.state.nodes.length > 0 ?
+                        <List style={{
+                            backgroundColor: this.props.screenProps.theme.backgroundColour,
+                        }}>
+                            <FlatList
+                                extraData={this.state.forceUpdate}
+                                data={this.state.nodes}
+                                keyExtractor={(item) => item.url + item.port}
+                                renderItem={({ item }) => (
+                                    <ListItem
+                                        title={item.name}
+                                        subtitle={`Node TX fee: ${prettyPrintAmount(item.fee, Config)}`}
+                                        leftIcon={
+                                            <View style={{
+                                                width: 50,
+                                                height: 50,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                backgroundColor: this.props.screenProps.theme.iconColour,
+                                                borderRadius: 45
+                                            }}>
+                                                <Text style={[Styles.centeredText, { 
+                                                    fontSize: 15,
+                                                    color: item.online ? '#33a532' : '#ff0000',
+                                                }]}>
+                                                    {item.online ? 'Online' : 'Offline'}
+                                                </Text>
+                                            </View>
+                                        }
+                                        titleStyle={{
+                                            color: this.state.selectedNode === item.url + ':' + item.port
+                                                ? this.props.screenProps.theme.primaryColour
+                                                : this.props.screenProps.theme.slightlyMoreVisibleColour,
+                                        }}
+                                        subtitleStyle={{
+                                            color: this.state.selectedNode === item.url + ':' + item.port
+                                                ? this.props.screenProps.theme.primaryColour
+                                                : this.props.screenProps.theme.slightlyMoreVisibleColour,
+                                        }}
+                                        onPress={async () => {
+                                            if (!item.online) {
+                                                Alert.alert(
+                                                    'Use offline node?',
+                                                    'Are you sure you want to attempt to connect to a node which is reporting as offline?',
+                                                    [
+                                                        {text: 'Yes', onPress: () => {
+                                                            this.swapNode(item);
+                                                        }},
+                                                        {text: 'Cancel', style: 'cancel'},
+                                                    ],
+                                                );
+                                            } else {
+                                                this.swapNode(item);
+                                            }
+                                        }}
+                                    />
+                                )}
+                            />
+                        </List> :
+                        <View style={{
+                            backgroundColor: this.props.screenProps.theme.backgroundColour,
+                            marginHorizontal: 20,
+                        }}>
+                            <Text style={{
+                                fontSize: 20,
+                                color: this.props.screenProps.theme.primaryColour,
+                            }}>
+                                Could not load nodes! Either the API is down, or you have no internet.
+                                Pull-to-refresh to try and load the nodes again.
+                            </Text>
+                        </View>
+                    }
+                </ScrollView>
+            </View>
+        );
+    }
+}
+
+export class OptimizeScreen extends React.Component {
+    static navigationOptions = ({ navigation, screenProps }) => ({
+        title: 'Optimize Wallet',
+    });
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            sent: 0,
+            completed: false,
+            fullyOptimized: false,
+        };
+
+        this.optimize();
+    }
+
+    async optimize() {
+        let failCount = 0;
+
+        while (true) {
+            const result = await Globals.wallet.sendFusionTransactionBasic();
+
+            console.log(result.error);
+
+            if (result.success) {
+                this.setState((prevState) => {
+                    return {
+                        sent: prevState.sent + 1,
+                    };
+                });
+
+                failCount = 0;
+            } else {
+                console.log(result.error.errorCode);
+
+                if (result.error.errorCode === WalletErrorCode.FULLY_OPTIMIZED) {
+                    this.setState({
+                        completed: true,
+                        fullyOptimized: true,
+                    });
+
+                    return;
+                }
+
+                if (failCount > 5) {
+                    this.setState({
+                        completed: true,
+                        error: result.error.toString(),
+                    });
+
+                    return;
+                }
+
+                failCount++;
+            }
+        }
+    }
+
+    render() {
+        return(
+            <View style={{
+                backgroundColor: this.props.screenProps.theme.backgroundColour,
+                flex: 1,
+            }}>
+                <View style={{
+                    marginTop: 60,
+                    marginLeft: 30,
+                    marginRight: 30,
+                }}>
+                    {!this.state.completed && <Animatable.Text
+                        style={{
+                            color: this.props.screenProps.theme.primaryColour,
+                            fontSize: 25,
+                        }}
+                        animation='pulse'
+                        iterationCount='infinite'
+                    >
+                        Optimizing wallet, please wait...
+                    </Animatable.Text>}
+
+                    {this.state.sent > 0 && !this.state.completed && <Text style={{ fontSize: 20, color: this.props.screenProps.theme.slightlyMoreVisibleColour }}>
+                        {`Sent ${this.state.sent} fusion transaction${this.state.sent >= 2 ? 's' : ''}.`}
+                    </Text>}
+
+                    {this.state.sent > 0 && this.state.completed && <Text style={{ fontSize: 20, marginTop: 10, color: this.props.screenProps.theme.slightlyMoreVisibleColour }}>
+                        {`${this.state.sent} fusion transaction${this.state.sent >= 2 ? 's were' : ' was'} sent. It may take some time for ${this.state.sent >= 2 ? 'them' : 'it'} to be included in a block. Once this is complete, your balance will unlock for spending.`}
+                    </Text>}
+
+                    {this.state.completed && this.state.fullyOptimized && <Text style={{ fontSize: 20, marginTop: 10, color: this.props.screenProps.theme.slightlyMoreVisibleColour }}>
+                        {this.state.sent > 0 ? 'Your wallet is now fully optimized!' : 'Wow, your wallet is already fully optimized! Nice!'}
+                    </Text>}
+
+                    {this.state.completed && !this.state.fullyOptimized && <Text style={{ fontSize: 20, marginTop: 10, color: this.props.screenProps.theme.slightlyMoreVisibleColour }}>
+                        {`We were not able to completely optimize your wallet. Error sending fusion transaction: ${this.state.error}`}
+                    </Text>}
+                </View>
             </View>
         );
     }
@@ -630,6 +912,17 @@ export class SettingsScreen extends React.Component {
                                 onClick: () => {
                                     this.props.navigation.navigate('DisableDoze');
                                 }
+                            },
+                            {
+                                title: 'Swap Node',
+                                description: 'Use an alternative daemon to sync your wallet',
+                                icon: {
+                                    iconName: 'ios-swap',
+                                    IconType: Ionicons,
+                                },
+                                onClick: () => {
+                                    this.props.navigation.navigate('SwapNode')
+                                },
                             },
                             {
                                 title: 'Swap Currency',
@@ -813,6 +1106,19 @@ export class SettingsScreen extends React.Component {
                                 checked: this.state.autoOptimize,
                             },
                             {
+                                title: 'Manually Optimize Wallet',
+                                description: 'Helps sending large TXs (See FAQ)',
+                                icon: {
+                                    iconName: 'refresh',
+                                    IconType: SimpleLineIcons,
+                                },
+                                onClick: () => {
+                                    optimizeWallet(this.props.navigation);
+                                },
+
+                            },
+                            /*
+                            {
                                 title: `View ${Config.appName} on ${Platform.OS === 'ios' ? 'the App Store' : 'Google Play'}`,
                                 description: 'Leave a rating or send the link to your friends',
                                 icon: {
@@ -838,6 +1144,7 @@ export class SettingsScreen extends React.Component {
                                            .catch((err) => Globals.logger.addLogMessage('Failed to open url: ' + err))
                                 },
                             },
+                            */
                             {
                                 title: 'Resync Wallet',
                                 description: 'Resync wallet from scratch',
@@ -972,18 +1279,34 @@ function rewindWallet(navigation) {
         'Are you sure you want to rewind your wallet? This will take a little time.',
         [
             {text: 'Rewind', onPress: () => {
-                const [ walletBlockCount ] = Globals.wallet.getSyncStatus();
+                const [walletBlockCount, localDaemonBlockCount, networkBlockCount] = Globals.wallet.getSyncStatus();
 
-                let rewindHeight = walletBlockCount;
+                //let rewindHeight = walletBlockCount;
+                let rewindHeight = networkBlockCount
 
-                if (walletBlockCount > 5000) {
-                    rewindHeight = walletBlockCount - 5000;
+                /*if (walletBlockCount > 5000) {
+                    rewindHeight = walletBlockCount - 5000;*/
+                if (networkBlockCount > 5000) {
+                    rewindHeight = networkBlockCount - 5000;
                 }
 
                 Globals.wallet.rewind(rewindHeight);
 
                 toastPopUp('Wallet rewind initiated');
                 navigation.navigate('Main', { reloadBalance: true } );
+            }},
+            {text: 'Cancel', style: 'cancel'},
+        ],
+    );
+}
+
+function optimizeWallet(navigation) {
+    Alert.alert(
+        'Optimize Wallet?',
+        'Are you sure you want to attempt to optimize your wallet? This may lock your funds for some time.',
+        [
+            {text: 'Optimize', onPress: () => {
+                navigation.navigate('Optimize');
             }},
             {text: 'Cancel', style: 'cancel'},
         ],

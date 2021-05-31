@@ -20,7 +20,7 @@ export class DisclaimerScreen extends React.Component {
         super(props);
 
         this.state = {
-            feeAccepted: Config.devFeePercentage > 0 ? false : true,
+            feeAccepted: Config.devFeeFixed > 0 ? false : true,
             keyOwnershipAccepted: false,
             warrantyAccepted: false,
         }
@@ -53,7 +53,7 @@ export class DisclaimerScreen extends React.Component {
                         Before we continue, please take a minute to read and agree to the below statements.
                     </Text>
 
-                    {Config.devFeePercentage > 0 && <View style={{ flexDirection: 'row', marginRight: 20, marginLeft: 25, marginBottom: 20 }}>
+                    {Config.devFeeFixed > 0 && <View style={{ flexDirection: 'row', marginRight: 20, marginLeft: 25, marginBottom: 20 }}>
                         <Switch
                             value={this.state.feeAccepted}
                             onValueChange={(value) => {
@@ -69,7 +69,7 @@ export class DisclaimerScreen extends React.Component {
                                 fontSize: 15,
                                 color: this.props.screenProps.theme.slightlyMoreVisibleColour,
                             }}>
-                                I understand that the fee for sending transactions is {Config.devFeePercentage}%.
+                                I understand that the fee for sending transactions is {Config.devFeeFixed} {Config.ticker}.
                             </Text>
                         </View>
                     </View>}

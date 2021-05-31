@@ -44,24 +44,24 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         return -1;
     }
 
-    KEY_OUTPUT = (jclass) env->NewGlobalRef(env->FindClass("com/ftsvault/KeyOutput"));
+    KEY_OUTPUT = (jclass) env->NewGlobalRef(env->FindClass("com/ftswallet/KeyOutput"));
     KEY_OUTPUT_CONST = env->GetMethodID(KEY_OUTPUT, "<init>", "(Ljava/lang/String;JJ)V");
     KEY_OUTPUT_KEY = env->GetFieldID(KEY_OUTPUT, "key", "Ljava/lang/String;");
     KEY_OUTPUT_AMOUNT = env->GetFieldID(KEY_OUTPUT, "amount", "J");
     KEY_OUTPUT_GLOBAL_INDEX = env->GetFieldID(KEY_OUTPUT, "globalIndex", "J");
 
-    RAW_TRANSACTION = (jclass) env->NewGlobalRef(env->FindClass("com/ftsvault/RawTransaction"));
-    RAW_TRANSACTION_CONST = env->GetMethodID(RAW_TRANSACTION, "<init>", "([Lcom/ftsvault/KeyOutput;Ljava/lang/String;Ljava/lang/String;)V");
-    RAW_TRANSACTION_KEY_OUTPUTS = env->GetFieldID(RAW_TRANSACTION, "keyOutputs", "[Lcom/ftsvault/KeyOutput;");
+    RAW_TRANSACTION = (jclass) env->NewGlobalRef(env->FindClass("com/ftswallet/RawTransaction"));
+    RAW_TRANSACTION_CONST = env->GetMethodID(RAW_TRANSACTION, "<init>", "([Lcom/ftswallet/KeyOutput;Ljava/lang/String;Ljava/lang/String;)V");
+    RAW_TRANSACTION_KEY_OUTPUTS = env->GetFieldID(RAW_TRANSACTION, "keyOutputs", "[Lcom/ftswallet/KeyOutput;");
     RAW_TRANSACTION_HASH = env->GetFieldID(RAW_TRANSACTION, "hash", "Ljava/lang/String;");
     RAW_TRANSACTION_TRANSACTION_PUBLIC_KEY = env->GetFieldID(RAW_TRANSACTION, "transactionPublicKey", "Ljava/lang/String;");
 
-    WALLET_BLOCK_INFO = (jclass) env->NewGlobalRef(env->FindClass("com/ftsvault/WalletBlockInfo"));
-    WALLET_BLOCK_INFO_CONST = env->GetMethodID(WALLET_BLOCK_INFO, "<init>", "(Lcom/ftsvault/RawTransaction;[Lcom/ftsvault/RawTransaction;)V");
-    WALLET_BLOCK_INFO_COINBASE_TRANSACTION = env->GetFieldID(WALLET_BLOCK_INFO, "coinbaseTransaction", "Lcom/ftsvault/RawTransaction;");
-    WALLET_BLOCK_INFO_TRANSACTIONS = env->GetFieldID(WALLET_BLOCK_INFO, "transactions", "[Lcom/ftsvault/RawTransaction;");
+    WALLET_BLOCK_INFO = (jclass) env->NewGlobalRef(env->FindClass("com/ftswallet/WalletBlockInfo"));
+    WALLET_BLOCK_INFO_CONST = env->GetMethodID(WALLET_BLOCK_INFO, "<init>", "(Lcom/ftswallet/RawTransaction;[Lcom/ftswallet/RawTransaction;)V");
+    WALLET_BLOCK_INFO_COINBASE_TRANSACTION = env->GetFieldID(WALLET_BLOCK_INFO, "coinbaseTransaction", "Lcom/ftswallet/RawTransaction;");
+    WALLET_BLOCK_INFO_TRANSACTIONS = env->GetFieldID(WALLET_BLOCK_INFO, "transactions", "[Lcom/ftswallet/RawTransaction;");
 
-    TRANSACTION_INPUT = (jclass) env->NewGlobalRef(env->FindClass("com/ftsvault/TransactionInput"));
+    TRANSACTION_INPUT = (jclass) env->NewGlobalRef(env->FindClass("com/ftswallet/TransactionInput"));
     TRANSACTION_INPUT_CONST = env->GetMethodID(TRANSACTION_INPUT, "<init>", "(Ljava/lang/String;JJJLjava/lang/String;Ljava/lang/String;)V");
     TRANSACTION_INPUT_KEY_IMAGE = env->GetFieldID(TRANSACTION_INPUT, "keyImage", "Ljava/lang/String;");
     TRANSACTION_INPUT_AMOUNT = env->GetFieldID(TRANSACTION_INPUT, "amount", "J");
@@ -69,15 +69,15 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     TRANSACTION_INPUT_GLOBAL_OUTPUT_INDEX = env->GetFieldID(TRANSACTION_INPUT, "globalOutputIndex", "J");
     TRANSACTION_INPUT_KEY = env->GetFieldID(TRANSACTION_INPUT, "key", "Ljava/lang/String;");
 
-    SPEND_KEY = (jclass) env->NewGlobalRef(env->FindClass("com/ftsvault/SpendKey"));
+    SPEND_KEY = (jclass) env->NewGlobalRef(env->FindClass("com/ftswallet/SpendKey"));
     SPEND_KEY_CONST = env->GetMethodID(SPEND_KEY, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
     SPEND_KEY_PUBLIC_KEY = env->GetFieldID(SPEND_KEY, "publicKey", "Ljava/lang/String;");
     SPEND_KEY_PRIVATE_KEY = env->GetFieldID(SPEND_KEY, "privateKey", "Ljava/lang/String;");
 
-    INPUT_MAP = (jclass) env->NewGlobalRef(env->FindClass("com/ftsvault/InputMap"));
-    INPUT_MAP_CONST = env->GetMethodID(INPUT_MAP, "<init>", "(Ljava/lang/String;Lcom/ftsvault/TransactionInput;)V");
+    INPUT_MAP = (jclass) env->NewGlobalRef(env->FindClass("com/ftswallet/InputMap"));
+    INPUT_MAP_CONST = env->GetMethodID(INPUT_MAP, "<init>", "(Ljava/lang/String;Lcom/ftswallet/TransactionInput;)V");
     INPUT_MAP_PUBLIC_SPEND_KEY = env->GetFieldID(INPUT_MAP, "publicSpendKey", "Ljava/lang/String;");
-    INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/ftsvault/TransactionInput;");
+    INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/ftswallet/TransactionInput;");
 
     JAVA_STRING = (jclass) env->NewGlobalRef(env->FindClass("java/lang/String"));
 
@@ -85,7 +85,7 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_ftsvault_TurtleCoinModule_processBlockOutputsJNI(
+Java_com_ftswallet_TurtleCoinModule_processBlockOutputsJNI(
     JNIEnv *env,
     jobject instance,
     jobject jWalletBlockInfo,
@@ -107,7 +107,7 @@ Java_com_ftsvault_TurtleCoinModule_processBlockOutputsJNI(
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_ftsvault_TurtleCoinModule_generateRingSignaturesJNI(
+Java_com_ftswallet_TurtleCoinModule_generateRingSignaturesJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,
@@ -128,8 +128,29 @@ Java_com_ftsvault_TurtleCoinModule_generateRingSignaturesJNI(
     return makeJNISignatures(env, signatures);
 }
 
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ftswallet_TurtleCoinModule_checkRingSignatureJNI(
+    JNIEnv *env,
+    jobject instance,
+    jstring jPrefixHash,
+    jstring jKeyImage,
+    jobjectArray jPublicKeys,
+    jobjectArray jSignatures)
+{
+    const Crypto::Hash prefixHash = makeNative32ByteKey<Crypto::Hash>(env, jPrefixHash);
+    const Crypto::KeyImage keyImage = makeNative32ByteKey<Crypto::KeyImage>(env, jKeyImage);
+    const std::vector<Crypto::PublicKey> publicKeys = makeNativePublicKeys(env, jPublicKeys);
+    const std::vector<Crypto::Signature> signatures = makeNativeSignatures(env, jSignatures);
+
+    const auto success = Crypto::checkRingSignature(
+        prefixHash, keyImage, publicKeys, signatures
+    );
+
+    return static_cast<jboolean>(success);
+}
+
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_ftsvault_TurtleCoinModule_generateKeyDerivationJNI(
+Java_com_ftswallet_TurtleCoinModule_generateKeyDerivationJNI(
     JNIEnv *env,
     jobject instance,
     jstring jTransactionPublicKey,
@@ -146,7 +167,7 @@ Java_com_ftsvault_TurtleCoinModule_generateKeyDerivationJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_ftsvault_TurtleCoinModule_generateKeyImageJNI(
+Java_com_ftswallet_TurtleCoinModule_generateKeyImageJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPublicEphemeral,
@@ -163,7 +184,7 @@ Java_com_ftsvault_TurtleCoinModule_generateKeyImageJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_ftsvault_TurtleCoinModule_deriveSecretKeyJNI(
+Java_com_ftswallet_TurtleCoinModule_deriveSecretKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
@@ -181,7 +202,7 @@ Java_com_ftsvault_TurtleCoinModule_deriveSecretKeyJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_ftsvault_TurtleCoinModule_derivePublicKeyJNI(
+Java_com_ftswallet_TurtleCoinModule_derivePublicKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
@@ -212,6 +233,22 @@ std::vector<Crypto::PublicKey> makeNativePublicKeys(JNIEnv *env, jobjectArray jP
     }
 
     return publicKeys;
+}
+
+std::vector<Crypto::Signature> makeNativeSignatures(JNIEnv *env, jobjectArray jSignatures)
+{
+    std::vector<Crypto::Signature> signatures;
+
+    int len = env->GetArrayLength(jSignatures);
+
+    for (int i = 0; i < len; i++)
+    {
+        jstring jSignature = (jstring)env->GetObjectArrayElement(jSignatures, i);
+        signatures.push_back(makeNative64ByteKey<Crypto::Signature>(env, jSignature));
+        env->DeleteLocalRef(jSignature);
+    }
+
+    return signatures;
 }
 
 WalletBlockInfo makeNativeWalletBlockInfo(JNIEnv *env, jobject jWalletBlockInfo)

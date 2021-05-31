@@ -2,7 +2,6 @@
 //
 // Please see the included LICENSE file for more information.
 
-/* TODO: replace with node fetch */
 const request = require('request-promise-native');
 
 import Config from './Config';
@@ -24,11 +23,11 @@ export async function getCoinPriceFromAPI() {
 
         const coinData = data[Config.coinName.toLowerCase()];
 
-        Globals.logger.addLogMessage('Updated coin price from CoinGecko API');
+        Globals.logger.addLogMessage('Updated coin price from API');
 
         return coinData;
     } catch (error) {
-        Globals.logger.addLogMessage('Failed to get price from API: ' + error);
+        Globals.logger.addLogMessage('Failed to get price from API: ' + error.toString());
         return undefined;
     }
 }

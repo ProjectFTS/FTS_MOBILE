@@ -34,7 +34,7 @@ import {
 
 import {
     SettingsScreen, SwapCurrencyScreen, ExportKeysScreen, LoggingScreen, FaqScreen,
-    DisableDozeScreen,
+    DisableDozeScreen, SwapNodeScreen, OptimizeScreen,
 } from './SettingsScreen';
 
 import {
@@ -121,6 +121,7 @@ const SettingsNavigator = createStackNavigator(
     {
         Settings: SettingsScreen,
         SwapCurrency: SwapCurrencyScreen,
+        SwapNode: SwapNodeScreen,
         ExportKeys: ExportKeysScreen,
         Logging: LoggingScreen,
         Faq: FaqScreen,
@@ -130,6 +131,7 @@ const SettingsNavigator = createStackNavigator(
         SetPin: SetPinScreen,
         ChooseAuthMethod: ChooseAuthMethodScreen,
         RequestHardwareAuth: RequestHardwareAuthScreen,
+        Optimize: OptimizeScreen,
     },
     {
         initialRouteName: 'Settings',

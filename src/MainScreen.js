@@ -1,7 +1,8 @@
 // Copyright (C) 2018-2019, Zpalmtree
-// Copyright (C) 2019, 2ACoin Developers
 //
 // Please see the included LICENSE file for more information.
+
+import * as Sentry from '@sentry/react-native';
 
 import React from 'react';
 
@@ -20,12 +21,14 @@ import {
     AppState, Platform, Linking, ScrollView, RefreshControl, Dimensions,
 } from 'react-native';
 
+import NetInfo from "@react-native-community/netinfo";
+
 import { prettyPrintAmount, LogLevel } from 'turtlecoin-wallet-backend';
 
 import Config from './Config';
 
 import { Styles } from './Styles';
-import { handleURI, toastPopUp } from './Utilities';
+import { handleURI, toastPopUp, delay } from './Utilities';
 import { ProgressBar } from './ProgressBar';
 import { saveToDatabase } from './Database';
 import { Globals, initGlobals } from './Globals';
@@ -38,6 +41,14 @@ import { coinsToFiat, getCoinPriceFromAPI } from './Currency';
 async function init(navigation) {
     Globals.wallet.scanCoinbaseTransactions(Globals.preferences.scanCoinbaseTransactions);
     Globals.wallet.enableAutoOptimization(Globals.preferences.autoOptimize);
+
+    /* Remove any previously added listeners */
+    Globals.wallet.removeAllListeners('incomingtx');
+    Globals.wallet.removeAllListeners('transaction');
+    Globals.wallet.removeAllListeners('createdtx');
+    Globals.wallet.removeAllListeners('createdfusiontx');
+    Globals.wallet.removeAllListeners('deadnode');
+    Globals.wallet.removeAllListeners('heightchange');
 
     Globals.wallet.on('incomingtx', (transaction) => {
         sendNotification(transaction);
@@ -62,9 +73,6 @@ async function init(navigation) {
     /* TODO: iOS support */
     if (Platform.OS === 'android') {
         Globals.wallet.setBlockOutputProcessFunc(processBlockOutputs);
-        /* Override with our native makePostRequest implementation which can
-           actually cancel requests part way through */
-        Config.defaultDaemon.makePostRequest = makePostRequest;
     }
 
     initGlobals();
@@ -116,7 +124,7 @@ export function sendNotification(transaction) {
 
 function getTruncatedBalance(amount) {
     var str = prettyPrintAmount(amount, Config);
-    var cbal = str.substring(0 , str.length - 9) + ' ' + Config.ticker; 
+    var cbal = str.substring(0 , str.length - 10) + ' ' + Config.ticker; 
     return cbal;
 }
 
@@ -140,6 +148,8 @@ export class MainScreen extends React.Component {
         this.refresh = this.refresh.bind(this);
         this.handleURI = this.handleURI.bind(this);
         this.handleAppStateChange = this.handleAppStateChange.bind(this);
+        this.handleNetInfoChange = this.handleNetInfoChange.bind(this);
+        this.unsubscribe = () => {};
 
         const [unlockedBalance, lockedBalance] = Globals.wallet.getBalance();
 
@@ -160,6 +170,12 @@ export class MainScreen extends React.Component {
         Globals.wallet.on('createdtx', () => {
             this.updateBalance();
         });
+
+        Globals.wallet.on('createdfusiontx', () => {
+            this.updateBalance();
+        });
+
+        //this.forceRewind();
     }
 
     async updateBalance() {
@@ -186,22 +202,50 @@ export class MainScreen extends React.Component {
         handleURI(url, this.props.navigation);
     }
 
+    async resumeSyncing() {
+        const netInfo = await NetInfo.fetch();
+
+        if (Globals.preferences.limitData && netInfo.type === 'cellular') {
+            return;
+        }
+
+        /* Note: start() is a no-op when already started */
+        Globals.wallet.start();
+    }
+
     /* Update coin price on coming to foreground */
-    handleAppStateChange(appState) {
+    async handleAppStateChange(appState) {
         if (appState === 'active') {
             this.updateBalance();
+            this.resumeSyncing();
+        }
+    }
+
+    async handleNetInfoChange({ type }) {
+        if (Globals.preferences.limitData && type === 'cellular') {
+            Globals.logger.addLogMessage("Network connection changed to cellular, and we are limiting data. Stopping sync.");
+            Globals.wallet.stop();
+        } else {
+            /* Note: start() is a no-op when already started
+             * That said.. it is possible for us to not want to restart here,
+            * for example, if we are in the middle of a node swap. Need investigation */
+            Globals.logger.addLogMessage("Network connection changed. Restarting sync process if needed.");
+            Globals.wallet.start();
         }
     }
 
     componentDidMount() {
+        this.unsubscribe = NetInfo.addEventListener(this.handleNetInfoChange);
         AppState.addEventListener('change', this.handleAppStateChange);
         Linking.addEventListener('url', this.handleURI);
         initBackgroundSync();
     }
 
     componentWillUnmount() {
+        NetInfo.removeEventListener('connectionChange', this.handleNetInfoChange);
         AppState.removeEventListener('change', this.handleAppStateChange);
         Linking.removeEventListener('url', this.handleURI);
+        this.unsubscribe();
     }
 
     async refresh() {
@@ -354,7 +398,7 @@ class BalanceComponent extends React.Component {
 
     render() {
         const compactBalance = <OneLineText
-                                     style={{ color: this.props.lockedBalance === 0 ? this.props.screenProps.theme.primaryColour : 'orange', fontSize: 25}}
+                                     style={{ color: this.props.lockedBalance === 0 ? this.props.screenProps.theme.primaryColour : 'orange', fontSize: 35}}
                                      onPress={() => this.setState({
                                          expandedBalance: !this.state.expandedBalance
                                      })}
@@ -364,7 +408,7 @@ class BalanceComponent extends React.Component {
 
         const lockedBalance = <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                                     <FontAwesome name={'lock'} size={22} color={'orange'} style={{marginRight: 7}}/>
-                                    <OneLineText style={{ color: 'orange', fontSize: 20}}
+                                    <OneLineText style={{ color: 'orange', fontSize: 25}}
                                           onPress={() => this.setState({
                                              expandedBalance: !this.state.expandedBalance
                                           })}>
@@ -374,7 +418,7 @@ class BalanceComponent extends React.Component {
 
         const unlockedBalance = <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                                     <FontAwesome name={'unlock'} size={22} color={this.props.screenProps.theme.primaryColour} style={{marginRight: 7}}/>
-                                    <OneLineText style={{ color: this.props.screenProps.theme.primaryColour, fontSize: 20}}
+                                    <OneLineText style={{ color: this.props.screenProps.theme.primaryColour, fontSize: 25}}
                                           onPress={() => this.setState({
                                              expandedBalance: !this.props.expandedBalance
                                           })}>
@@ -439,7 +483,7 @@ class SyncComponent extends React.Component {
         }
 
         /* Don't divide by zero */
-        let progress = networkHeight === 0 ? 0 : walletHeight / networkHeight;
+        let progress = networkHeight === 0 ? 100 : walletHeight / networkHeight;
 
         if (progress > 1) {
             progress = 1;
@@ -455,6 +499,8 @@ class SyncComponent extends React.Component {
         /* Prevent 100% when just under */
         if (percent > 99.99 && percent < 100) {
             percent = 99.99;
+        } else if (percent > 100) {
+            percent = 100;
         }
 
         const justSynced = progress === 1 && this.state.progress !== 1;
@@ -466,6 +512,20 @@ class SyncComponent extends React.Component {
             progress,
             percent: percent.toFixed(2),
         }, () => { if (justSynced) { this.sync.bounce(800) } });
+
+        this.forceRewind();
+    }
+
+    /* Force rewind after creating wallet */
+    /* set delay of 5secs, for initial sync when recovering wallet */
+    async forceRewind() {
+        await delay(5000);
+        const [walletHeight, localHeight, networkHeight] = Globals.wallet.getSyncStatus();
+        if (walletHeight === 0 ) {
+            rewindHeight = networkHeight - 5000;
+            //Sentry.captureMessage(`MainScreen updateSyncStatus :: ${walletHeight} :: ${localHeight} :: ${networkHeight}`);
+            Globals.wallet.rewind(rewindHeight);
+        }
     }
 
     componentDidMount() {

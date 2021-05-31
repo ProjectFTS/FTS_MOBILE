@@ -186,7 +186,7 @@ export class TransactionDetailsScreen extends React.Component {
                         <Button
                             title='View on Block Explorer'
                             onPress={() => {
-                                Linking.openURL(Config.explorerBaseURL + this.state.transaction.hash + '#blockchain_transaction')
+                                Linking.openURL(Config.explorerBaseURL + this.state.transaction.hash)
                                        .catch((err) => Globals.logger.addLogMessage('Failed to open url: ' + err));
                             }}
                             color={this.props.screenProps.theme.primaryColour}
@@ -333,7 +333,7 @@ class TransactionList extends React.Component {
 
     getIconColour(transaction) {
         if (transaction.totalAmount() >= 0) {
-            /* Intentionally using the 2ACoin color here, instead of the
+            /* Intentionally using the TurtleCoin green here, instead of the
                theme colour - we want green/red, not to change based on theme */
             return '#40C18E';
         }

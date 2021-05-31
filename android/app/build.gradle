@@ -5,7 +5,6 @@ import com.android.build.OutputFile
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
  * and bundleReleaseJsAndAssets).
- *
  * These basically call `react-native bundle` with the correct arguments during the Android build
  * cycle. By default, bundleDebugJsAndAssets is skipped, as in debug/dev mode we prefer to load the
  * bundle directly from the development server. Below you can see all the possible configurations
@@ -83,7 +82,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
-// apply from: "../../node_modules/react-native-sentry/sentry.gradle"
+apply from: "../../node_modules/@sentry/react-native/sentry.gradle"
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -131,12 +130,11 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.ftsvault"
+        applicationId "com.ftswallet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "v0.1.0.9"
-        missingDimensionStrategy 'react-native-camera', 'general'
+        versionCode 100
+        versionName "v1.0.0"
         ndk {
             abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
             moduleName "TurtleCoin_jni"
@@ -213,7 +211,6 @@ android {
 
 dependencies {
     implementation project(':react-native-fingerprint-scanner')
-    implementation project(':react-native-sentry')
     implementation project(':react-native-background-fetch')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules

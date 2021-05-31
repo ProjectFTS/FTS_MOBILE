@@ -1,5 +1,4 @@
 // Copyright (C) 2018, Zpalmtree
-// Copyright (C) 2019, 2ACoin Developers
 // Copyright (C) 2020, FTSCoin Developers
 //
 // Please see the included LICENSE file for more information.
@@ -10,7 +9,7 @@ import { MixinLimit, MixinLimits, Daemon } from 'turtlecoin-wallet-backend';
 
 import {
     derivePublicKey, generateKeyDerivation, generateRingSignatures,
-    deriveSecretKey, generateKeyImage,
+    deriveSecretKey, generateKeyImage, checkRingSignature,
 } from './NativeCode';
 
 const Config = new function() {
@@ -30,14 +29,14 @@ const Config = new function() {
     this.walletSaveFrequency = 60 * 1000;
 
     /**
-     * The amount of decimal places your coin has, e.g. 2ACoin has eight
+     * The amount of decimal places your coin has, e.g. FTSCoin has 8
      * decimals
      */
     this.decimalPlaces = 8;
 
     /**
      * The address prefix your coin uses - you can find this in CryptoNoteConfig.h.
-     * In 2ACoin, this converts to guns
+     * In FTSCoin, this converts to fts
      */
     this.addressPrefix = 1967208;
 
@@ -71,7 +70,7 @@ const Config = new function() {
      * high a value will cause the event loop to be blocked, and your interaction
      * to be laggy.
      */
-    this.blocksPerTick = 1;
+    this.blocksPerTick = 100;
 
     /**
      * Your coins 'ticker', generally used to refer to the coin, i.e. 123 TRTL
@@ -87,20 +86,20 @@ const Config = new function() {
     /**
      * The minimum fee allowed for transactions, in ATOMIC units
      */
-    this.minimumFee = 10000000;
+    this.minimumFee = 10000;
 
     /**
      * Mapping of height to mixin maximum and mixin minimum
      */
     this.mixinLimits = new MixinLimits([
         /* Height: 0, minMixin: 0, maxMixin: 100, defaultMixin: 3 - V1 */
-        new MixinLimit(1000, 0, 100, 0),
+        new MixinLimit(1000, 0, 100, 1),
 
         /* Height: 250, minMixin: 0, maxMixin: 7, defaultMixin: 7 - V2*/
-        new MixinLimit(1500, 0, 7, 0),
+        new MixinLimit(300000, 0, 100, 1),
 
         /* Height: 100,000, minMixin: 0, maxMixin: 3, defaultMixin: 3 */
-        new MixinLimit(100000, 0, 3, 0),
+        new MixinLimit(1000000, 0, 3, 1),
     ], 0 /* Default mixin of 3 before block 250 */),
 
     /**
@@ -143,6 +142,11 @@ const Config = new function() {
     this.generateKeyImage = Platform.OS === 'ios' ? undefined : generateKeyImage;
 
     /**
+     * Use our native func instead of JS slowness
+     */
+    this.checkRingSignatures = Platform.OS === 'ios' ? undefined: checkRingSignature;
+
+    /**
      * Memory to use for storing downloaded blocks - 3MB
      */
     this.blockStoreMemoryLimit = 1024 * 1024 * 3;
@@ -168,9 +172,14 @@ const Config = new function() {
     this.devFeePercentage = 0.1;
 
     /**
+     * Fee to take on all transactions, fixed amount
+     */
+    this.devFeeFixed = 0.1;
+
+    /**
      * Address to send dev fee to
      */
-    this.devFeeAddress = 'fts1eXwCpKb7hu5rG48PFEDCEVtVmME4jLvb78bWsLj8FSEcxPuwVcGLJMXmojWceUik5fxuqeeCyVEj6LBbsH891tMQgkpfCr';
+    this.devFeeAddress = 'fts1XFHV4aGCYKKoYkj7kHGr1btyir1nULAFR3eE9GbT2VcSs8UM5jLexVPC2b7YuwJyc2fGxfo8vRBNUzsag9cs2gbFhEyVSB';
 
     /**
      * Base url for price API
@@ -197,7 +206,7 @@ const Config = new function() {
     /**
      * This only controls the name in the settings screen.
      */
-    this.appName = 'FTSVault';
+    this.appName = 'FTSWallet';
 
     /**
      * Slogan phrase during wallet CreateScreen
@@ -207,23 +216,30 @@ const Config = new function() {
     /**
      * Displayed in the settings screen
      */
-    this.appVersion = 'v0.1.0.9';
+    this.appVersion = 'v1.0.0';
 
     /**
      * Base URL for us to chuck a hash on the end, and find a transaction
      */
-    this.explorerBaseURL = 'http://ftscoin.xyz/block/?hash=';
+    this.explorerBaseURL = 'http://ftscoin.xyz/block/index.html?hash=';
+    this.explorerSuffix = "#blockchain_transaction"; 
 
     /**
      * A link to your app on the Apple app store. Currently blank because we
      * haven't released for iOS yet...
      */
-    this.appStoreLink = 'https://github.com/ProjectFTS/ftscoin-mobile-wallet/releases';
+    this.appStoreLink = '';
 
     /**
      * A link to your app on the google play store
      */
-    this.googlePlayLink = 'https://play.google.com/store/apps/details?id=com.ftsvault';
+    this.googlePlayLink = 'https://play.google.com/store/apps/details?id=com.ftswallet';
+
+    /**
+     * A url to fetch node info from. Should follow the turtlepay format 
+     * detailed here: https://docs.turtlepay.io/blockapi/
+     */
+    this.nodeListURL = 'https://raw.githubusercontent.com/ProjectFTS/ftsnodes/master/nodes.json';
 };
 
 module.exports = Config;

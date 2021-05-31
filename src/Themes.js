@@ -1,5 +1,5 @@
 // Copyright (C) 2018, Zpalmtree
-// Copyright (C) 2019, 2ACoin Developers
+// Copyright (C) 2020, crypTuron
 //
 // Please see the included LICENSE file for more information.
 
@@ -11,31 +11,31 @@ export const Themes = {
         backgroundColour: 'white',
 
         /**
-         * The primary colour used by the wallet, for 2ACoin this is #3A444C
+         * The primary colour used by the wallet, for PGO this is #6100b5
          */
-        primaryColour: '#3A444C',
+        primaryColour: '#6100b5',
 
         /**
          * Colour for the background circles on the pin page
          */
-        pinCodeBackgroundColour: '#9EBBD1',
+        pinCodeBackgroundColour: '#b291ce',
 
         /**
          * Colour for the pin code numbers
          * Note that when you click them, a different theme is applied.
          */
-        pinCodeForegroundColour: '#3A444C',
+        pinCodeForegroundColour: '#6100b5',
 
         /**
          * We chose to use a darker shade here. It is very rarely used.
          */
-        secondaryColour: '#1B2023',
+        secondaryColour: '#390169',
 
         /**
          * Terrible name, lol. This is used things which shouldn't pop out
          * much, like the 'TOTAL BALANCE' text.
          */
-        notVeryVisibleColour: 'lightgray',
+        notVeryVisibleColour: 'gray',
 
         /**
          * This is used for the same sort of things as notVeryVisibleColour,
@@ -63,13 +63,13 @@ export const Themes = {
              * Your foreground colour needs to be a darkish colour, or the
              * code will not scan.
              */
-            foregroundColour: 'gray',
+            foregroundColour: '#2C2F33',
 
             /**
              * Your background colour needs to be a lightish colour, or the
              * code will not scan.
              */
-            backgroundColour: 'white',
+            backgroundColour: 'lightgray',
         },
     },
     darkMode: {
@@ -81,29 +81,29 @@ export const Themes = {
         /**
          * The primary colour used by the wallet, for 2ACoin this is #3A444C
          */
-        primaryColour: '#3A444C',
+        primaryColour: '#6100b5',
 
         /**
          * Colour for the background circles on the pin page
          */
-        pinCodeBackgroundColour: '#9EBBD1',
+        pinCodeBackgroundColour: '#b291ce',
 
         /**
          * Colour for the pin code numbers
          * Note that when you click them, a different theme is applied.
          */
-        pinCodeForegroundColour: '#3A444C',
+        pinCodeForegroundColour: '#6100b5',
 
         /**
          * We chose to use a darker shade here. It is very rarely used.
          */
-        secondaryColour: '#1B2023',
+        secondaryColour: '#390169',
 
         /**
          * Terrible name, lol. This is used things which shouldn't pop out
          * much, like the 'TOTAL BALANCE' text.
          */
-        notVeryVisibleColour: 'gray',
+        notVeryVisibleColour: 'lightgray',
 
         /**
          * This is used for the same sort of things as notVeryVisibleColour,

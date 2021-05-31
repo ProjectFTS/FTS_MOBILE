@@ -42,10 +42,18 @@ export function initBackgroundSync() {
 let State = {
     shouldStop: false,
     running: false,
+    unsubscribe: () => {},
 }
 
 function onStateChange(state) {
     if (state !== 'background') {
+        State.shouldStop = true;
+    }
+}
+
+async function handleNetInfoChange({ type }) {
+    if (Globals.preferences.limitData && type === 'cellular') {
+        Globals.logger.addLogMessage("[Background Sync] Network connection changed to cellular, and we are limiting data. Stopping sync.");
         State.shouldStop = true;
     }
 }
@@ -82,6 +90,8 @@ async function setupBackgroundSync() {
         return false;
     }
 
+    State.unsubscribe = NetInfo.addEventListener(handleNetInfoChange);
+
     AppState.addEventListener('change', onStateChange);
 
     State.shouldStop = false;
@@ -97,7 +107,10 @@ async function setupBackgroundSync() {
 function finishBackgroundSync() {
     AppState.removeEventListener('change', onStateChange);
 
-    BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+    State.unsubscribe();
+
+    //BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+    BackgroundFetch.finish();
 
     State.running = false;
 
@@ -130,7 +143,7 @@ async function fromHeadlessJSInit() {
     }
 
     const [wallet, walletError] = WalletBackend.loadWalletFromJSON(
-        Config.defaultDaemon, walletData, Config
+        Globals.getDaemon(), walletData, Config
     );
 
     if (walletError) {
@@ -142,6 +155,9 @@ async function fromHeadlessJSInit() {
 
     Globals.wallet.scanCoinbaseTransactions(Globals.preferences.scanCoinbaseTransactions);
     Globals.wallet.enableAutoOptimization(Globals.preferences.autoOptimize);
+
+    /* Remove any previously added listeners to pretend double notifications */
+    Globals.wallet.removeAllListeners('incomingtx');
 
     Globals.wallet.on('incomingtx', (transaction) => {
         sendNotification(transaction);
@@ -157,10 +173,17 @@ async function fromHeadlessJSInit() {
     /* TODO: iOS support */
     if (Platform.OS === 'android') {
         Globals.wallet.setBlockOutputProcessFunc(processBlockOutputs);
-        /* Override with our native makePostRequest implementation which can
-           actually cancel requests part way through */
-        Config.defaultDaemon.makePostRequest = makePostRequest;
     }
+    /* Force rewind wallet here */
+    /*
+    const [walletBlockCount, localDaemonBlockCount, networkBlockCount] = Globals.wallet.getSyncStatus();
+    Sentry.captureMessage(`BackgroundSync=> ${walletBlockCount} :: ${localDaemonBlockCount} :: ${networkBlockCount}`);
+    let rewindHeight = networkBlockCount
+    if (walletBlockCount === 0 ) {
+        rewindHeight = networkBlockCount - 5000;
+        Globals.wallet.rewind(rewindHeight);
+    }
+    */
 
     PushNotification.configure({
         onNotification: (notification) => {
@@ -187,7 +210,8 @@ async function fromHeadlessJSInit() {
  */
 export async function backgroundSync() {
     if (!await setupBackgroundSync()) {
-        BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NO_DATA);
+        //BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NO_DATA);
+        BackgroundFetch.finish();
         return;
     } else {
         State.running = true;

@@ -1,8 +1,8 @@
 platform :ios, '9.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-target 'TonChan' do
-  # Pods for TonChan
+target 'FTSWallet' do
+  # Pods for FTSWallet
   pod 'React', :path => '../node_modules/react-native/'
   pod 'React-Core', :path => '../node_modules/react-native/React'
   pod 'React-DevSupport', :path => '../node_modules/react-native/React'
@@ -37,9 +37,7 @@ target 'TonChan' do
 
   pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'
 
-  pod 'SentryReactNative', :path => '../node_modules/react-native-sentry'
-
-  target 'TonChanTests' do
+  target 'FTSWalletTests' do
     inherit! :search_paths
     # Pods for testing
   end
@@ -47,10 +45,10 @@ target 'TonChan' do
   use_native_modules!
 end
 
-target 'TonChan-tvOS' do
-  # Pods for TonChan-tvOS
+target 'FTSWallet-tvOS' do
+  # Pods for FTSWallet-tvOS
 
-  target 'TonChan-tvOSTests' do
+  target 'FTSWallet-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

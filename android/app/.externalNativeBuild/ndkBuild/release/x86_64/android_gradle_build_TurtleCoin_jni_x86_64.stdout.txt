@@ -1,0 +1,1 @@
+make: '/home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/obj/local/x86_64/libTurtleCoin_jni.so' is up to date.

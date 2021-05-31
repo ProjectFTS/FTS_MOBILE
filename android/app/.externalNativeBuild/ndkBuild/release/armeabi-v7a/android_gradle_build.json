@@ -1,0 +1,53 @@
+{
+  "buildFiles": [
+    "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/Android.mk",
+    "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/Application.mk"
+  ],
+  "cleanCommands": [
+    "/home/kape/Android/Sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/Application.mk APP_ABI\u003darmeabi-v7a NDK_ALL_ABIS\u003darmeabi-v7a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003d/home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/lib clean"
+  ],
+  "libraries": {
+    "TurtleCoin_jni-release-armeabi-v7a": {
+      "buildCommand": "/home/kape/Android/Sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/Application.mk APP_ABI\u003darmeabi-v7a NDK_ALL_ABIS\u003darmeabi-v7a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-16 NDK_OUT\u003d/home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003d/home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/lib /home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/obj/local/armeabi-v7a/libTurtleCoin_jni.so",
+      "toolchain": "toolchain-armeabi-v7a",
+      "abi": "armeabi-v7a",
+      "artifactName": "TurtleCoin_jni",
+      "files": [
+        {
+          "src": "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/TurtleCoin.cpp",
+          "flags": "-target armv7-none-linux-androideabi16 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fno-exceptions -fno-rtti -fpic -march\u003darmv7-a -mthumb -Oz -DNDEBUG -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include -I/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni -O3 -O3 -std\u003dc++17 -DANDROID -nostdinc++ -Wformat -Werror\u003dformat-security -fno-strict-aliasing"
+        },
+        {
+          "src": "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/crypto-ops-data.cpp",
+          "flags": "-target armv7-none-linux-androideabi16 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fno-exceptions -fno-rtti -fpic -march\u003darmv7-a -mthumb -Oz -DNDEBUG -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include -I/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni -O3 -O3 -std\u003dc++17 -DANDROID -nostdinc++ -Wformat -Werror\u003dformat-security -fno-strict-aliasing"
+        },
+        {
+          "src": "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/crypto-ops.cpp",
+          "flags": "-target armv7-none-linux-androideabi16 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fno-exceptions -fno-rtti -fpic -march\u003darmv7-a -mthumb -Oz -DNDEBUG -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include -I/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni -O3 -O3 -std\u003dc++17 -DANDROID -nostdinc++ -Wformat -Werror\u003dformat-security -fno-strict-aliasing"
+        },
+        {
+          "src": "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/crypto.cpp",
+          "flags": "-target armv7-none-linux-androideabi16 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fno-exceptions -fno-rtti -fpic -march\u003darmv7-a -mthumb -Oz -DNDEBUG -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include -I/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni -O3 -O3 -std\u003dc++17 -DANDROID -nostdinc++ -Wformat -Werror\u003dformat-security -fno-strict-aliasing"
+        },
+        {
+          "src": "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/hash.cpp",
+          "flags": "-target armv7-none-linux-androideabi16 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fno-exceptions -fno-rtti -fpic -march\u003darmv7-a -mthumb -Oz -DNDEBUG -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include -I/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni -O3 -O3 -std\u003dc++17 -DANDROID -nostdinc++ -Wformat -Werror\u003dformat-security -fno-strict-aliasing"
+        },
+        {
+          "src": "/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni/keccak.cpp",
+          "flags": "-target armv7-none-linux-androideabi16 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fno-exceptions -fno-rtti -fpic -march\u003darmv7-a -mthumb -Oz -DNDEBUG -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -I/home/kape/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include -I/home/kape/ftscoin-mobile-wallet/android/app/src/main/jni -O3 -O3 -std\u003dc++17 -DANDROID -nostdinc++ -Wformat -Werror\u003dformat-security -fno-strict-aliasing"
+        }
+      ],
+      "output": "/home/kape/ftscoin-mobile-wallet/android/app/build/intermediates/ndkBuild/release/obj/local/armeabi-v7a/libTurtleCoin_jni.so"
+    }
+  },
+  "toolchains": {
+    "toolchain-armeabi-v7a": {
+      "cppCompilerExecutable": "/home/kape/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

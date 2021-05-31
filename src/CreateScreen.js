@@ -2,6 +2,8 @@
 //
 // Please see the included LICENSE file for more information.
 
+import * as Sentry from '@sentry/react-native';
+
 import React from 'react';
 
 import {
@@ -81,8 +83,8 @@ export class CreateWalletScreen extends React.Component {
 
     constructor(props) {
         super(props);
-        
-        Globals.wallet = WalletBackend.createWallet(Config.defaultDaemon, Config);
+
+        Globals.wallet = WalletBackend.createWallet(Globals.getDaemon(), Config);
 
         /* Save wallet in DB */
         saveToDatabase(Globals.wallet);
